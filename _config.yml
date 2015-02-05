@@ -1,0 +1,49 @@
+permalink: /:year/:month/:day/:title.html
+paginate: 10
+markdown: kramdown
+
+kramdown:
+  input: GFM
+
+# 作者信息
+author: 
+  name: 刍狗
+  email: strawdog@126.com
+  link: http://cugou.org
+  weibo: 
+  github: http://github.com/cugou
+
+# 站点信息
+title: 万物皆刍狗
+description: 万物皆刍狗
+url: http://cugou.org
+rss_url: /pages/atom.xml
+
+# gavatar头像及Favicon
+gavatar: /public/img/snake.jpg
+favicon: /public/img/snake.jpg
+
+# google analytics 设置
+ga:
+  id: UA-54767140-1
+  url: cugou.org
+
+# disqus 设置
+disqus:
+  shortname: snake
+
+# 主题设置，自动激活某个标签
+active: writeup
+
+# 首页除了最新文章外显示分类
+cates: 
+  - Android
+  - 漏洞学习
+
+# 中文本地化
+locals:
+  tags: 标签
+  about: 关于
+  newest: 最新文章
+  archive: 归档
+  content: 目录
