@@ -37,8 +37,8 @@ active: writeup
 
 # 首页除了最新文章外显示分类
 cates: 
-  - Android
-  - 漏洞学习
+  - android
+  - 漏洞
 
 # 中文本地化
 locals:
