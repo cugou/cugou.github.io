@@ -21,7 +21,7 @@ EvilAPK-300
 然后又想到使用qemu这款开源的模拟系统，他可以在x86平台上模拟arm指令系统，在这个平台上可以安装arm-linux。
 后来发现，实际上不用这么麻烦，android开发者平台集成了一个模拟器，支持x86 atom、arm、mips三种指令系统。实际上这个模拟器底层就是使用的qemu。
 
-安装android emulator：
+### 安装android emulator：
 我是经历了一个痛苦的过程，这个过程是伟大的GFW带来的。真想不明白，既然这么痛恨google，为什么还允许google的产品成为绝大多数国人手中的玩物！！！
 1、最简单的方法，直接安装andriod studio。
 http://developer.android.com/sdk/index.html
