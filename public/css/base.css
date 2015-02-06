@@ -94,6 +94,17 @@ body, html {
   text-align: center;
   color: #fff;
 }
+.aside3-content {padding-left: 30px;padding-right: 30px;}
+/* 文章内容排版 */
+a:hover {text-decoration:none;}
+#content {font-size: 18px; line-height: 1.5;}
+#content p {margin: 20px 0px;}
+#content ul, ol, dl, li {margin: 10px 0px;}
+.nav > li {margin: 0px;}
+#content h2, h3 {line-height: 2;}
+#content blockquote > :first-child {margin-top: 0; }
+#content blockquote > :last-child {margin-bottom: 0;}
+/*
 .aside3-content {
   padding-left: 40px;
   padding-right: 40px;
@@ -109,6 +120,7 @@ body, html {
 blockquote p {
   font-size: 20px;
 }
+*/
 /* 其他配置 */
 .center {
   text-align: center;
