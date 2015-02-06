@@ -52,3 +52,6 @@ APK在执行过程中使用了一个文件作为输入，请问该文件的名�
 ![图四](/public/img/2015-01-16-alictf-2014_android_No1_No2-4.jpg)
 
 比较发现两者有些不一致，因为学习目的，没有参加比赛，掌握方法就行了，结果不是很重要。
+
+
+[题目下载](/public/download/2015-01-16-alictf-2014_android_No1_No2.rar)
