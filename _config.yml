@@ -37,7 +37,7 @@ active: writeup
 
 # 首页除了最新文章外显示分类
 cates: 
-  - android
+  - reverse
   - 漏洞
 
 # 中文本地化
