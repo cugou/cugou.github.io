@@ -12,6 +12,7 @@ description:
 要感谢各位android大牛对此题的详细介绍。我只是照着做了一遍，对有些不明确的地方自己演练了一下，并对android的so调试进行了一下简单的归纳。
 
 ## 从零开始进行android的so代码调试：
+
 ### 一、工具准备：
 jre——java runtime enveroment    //下面的一切工具都要这个支持
 jdk——java development kits    //需要用到里面的jdb程序
