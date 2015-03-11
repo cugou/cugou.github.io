@@ -9,6 +9,7 @@ description:
 
 # java代码分析
  静态分析实在是坑爹，这个跳来跳去，还有混淆和干扰的代码实在是调试来的快一些。
+
 ```java
 //Main.java
 public void onCreate(android.os.Bundle p5)
@@ -319,3 +320,10 @@ public void handleMessage(android.os.Message p5)
     return;
 }
 ```
+```java
+new StringBuilder().append(((f) e.getAnnotation(f)).a()).append(((f) a.getAnnotation(f)).a()).toString().getBytes()
+```
+这句代码调用类的getAnnotation方法获取类的Annotation信息。这个信息存储在类的class_def_item的Annotation相关字段中。下面是010Editor的截图：
+
+![图](/public/img/e.getAnnotation_f_.a.png)
+![图](/public/img/a.getAnnotation_f_.a.png)
