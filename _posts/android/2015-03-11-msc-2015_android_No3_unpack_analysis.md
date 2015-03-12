@@ -65,3 +65,206 @@ java层的分析见博客的另一篇[java静态分析](http://cugou.github.io/2
 
 
 # 壳分析
+
+就我的菜鸟水平来说，这个壳还是比较夸张的。主要进行了以下几个方面的加强：
+
+	1. 所有字符串都是加密的，运行时解密。
+	2. 对系统函数调用进行了封装，多了一个中间层。重建的C函数调用表顺序是乱的，打散存放在.bss段，而且还有冗余。JNI native函数也是动态获取
+	3. 对C++类和函数进行了隐藏处理，IDA不能自动识别，但个别具有构造函数特征的函数还是可以看出是一个类函数。
+	4. 大部分功能函数进行了混淆，混淆算法还算简单，用一系列大数进行比较和交叉跳转来混淆原来的程序执行流程。
+	5. 关键解密dex文件的流程放到了线程中。
+	6. 主线程和关键线程都使用了ptrace进行反调试。并会创建专门的反调试线程，监视进程是否被调试。
+	7. 关键的函数调用链中间使用了.data.rel.ro中调用表，所以静态分析的函数的`xref to`很难找到源头。
+	
+### 一、绕过反调试
+
+可以在JNI_onLoad上下断，F8到`111BC:		BL sub_86A28`，发现一旦执行这个函数就会出错。进去看发现了`ptrace`调用。（进入没有隐藏ptrace，而是直接使用了导入表）
+
+这里可以在libc.so的`ptrace`上下断，结合静态分析对`ptrace`交叉引用，大致判断一下哪些地方存在反调试。（因为ptrace没有隐藏，所以可以使用这种方法）
+
+当然我这里直接`PC+4`跳过了这个函数（主要是简单撸了一下sub_86A28，除了ptrace调用和创建反调试监视线程，没有特别的地方），运气很好（因为反调试还存在于后续的某个关键线程中，只是这个线程没有被IDA附加，可以正常运行），程序可以正常运行起来。
+
+到此，可以结合前面讲到的快速脱壳，查看和dump出相应内存的dex文件了。
+
+### 二、C函数的调用表（中间层）分析
+
+libc.so里的函数调用会提供很多程序功能的猜测。一般静态分析一下程序调用了哪些C函数，可以大致猜测出程序中某些函数的关键功能，给逆向提供很好的方向指引。（这也是为什么壳要隐藏C函数调用的原因）
+当然，不去分析调用表也是可以的，F8到相应调用的时候，IDA会给出调用的C函数名称。只是这种方法太过局部和耗时。
+
+程序是在JNI_onLoad的开始的循环中，调用了10+9个函数来建立这个C函数的调用表的。这里ali还算降低难度的，都放到了“可见”的地方。但这19个函数地址哪里来？ELF里面也存在PE中的TLS，会在main之前调用。很多windows下的pe程序，这里是反调试或者壳入口的最佳地点。
+
+`
+------------------------------------------------------------
+
+sub_19108
+关注内存地址95ad0开始的区域
+解码函数字符串unlink，dword_95ad4 = dlsym(-1, "unlink");
+
+------------------------------------------------------------
+
+sub_19e88
+dword_95b00 = dlsym(-1, "perror")
+
+-------------------------------------------------------------
+
+sub_1f920
+dword_95b28 = dlsym(-1, "mprotect")
+dword_95b2c = dlsym(-1, "fopen")
+dword_95b30 = dlsym(-1, "fgetln")
+dword_95b34 = dlsym(-1, "sscanf")
+dword_95b38 = dlsym(-1, "free")
+
+--------------------------------------------------------------
+
+sub_201e8
+dword_95fd0 = dlsym(-1, "dlsym")
+dword_95fd4 = dlsym(-1, "access")
+dword_95fd8 = dlsym(-1, "system")
+
+--------------------------------------------------------------
+
+sub_207d0
+dword_960c8 = dlsym(-1, "access")
+dword_960cc = dlsym(-1, "open")
+dword_960d0 = dlsym(-1, "sprintf")
+dword_960d4 = dlsym(-1, "system")
+dword_960d8 = dlsym(-1, "close")
+
+---------------------------------------------------------------
+
+sub_20c2c
+dword_96170 = dlsym(-1, "free")
+dword_96174 = dlsym(-1, "strdup")
+dword_96178 = dlsym(-1, "pthread_create")
+dword_9617c = dlsym(-1, "pthread_join")
+
+----------------------------------------------------------------
+
+sub_226f8
+dword_961c4 = dlsym(-1, "snprintf")
+dword_961c8 = dlsym(-1, "fopen")
+dword_961cc = dlsym(-1, "fgets")
+dword_961d0 = dlsym(-1, "strstr")
+dword_961d4 = dlsym(-1, "strtok")
+dword_961d8 = dlsym(-1, "fclose")
+
+----------------------------------------------------------------
+
+sub_23504
+dword_96268 = dlsym(-1, "fopen")
+dword_9626c = dlsym(-1, "fgets")
+dword_96270 = dlsym(-1, "strstr")
+dword_96274 = dlsym(-1, "sscanf")
+dword_96278 = dlsym(-1, "fclose")
+dword_9627c = dlsym(-1, "sprintf")
+dword_96280 = dlsym(-1, "free")
+dword_96284 = dlsym(-1, "pthread_create")
+
+-----------------------------------------------------------------
+
+sub_32d08
+dword_9634c = dlsym(-1, "sscanf")
+dword_96350 = dlsym(-1, "mprotect")
+dword_96354 = dlsym(-1, "mmap")
+dword_96358 = dlsym(-1, "munmap")
+dword_9635c = dlsym(-1, "free")
+
+------------------------------------------------------------------
+第二组9个函数
+------------------------------------------------------------------
+
+sub_343e4
+dword_96400 = dlsym(-1, "write")
+
+--------------------------------------------------------------------
+
+sub_351cc
+dword_96470 = dlsym(-1, "open")
+dword_96474 = dlsym(-1, "write")
+dword_96478 = dlsym(-1, "close")
+dword_9647c = dlsym(-1, "read")
+
+--------------------------------------------------------------------
+
+sub_37500
+dword_965a8 = dlsym(-1, "pthread_create")
+dword_965ac = dlsym(-1, "read")
+
+--------------------------------------------------------------------
+
+sub_398e0
+dword_965f0 = dlsym(-1, "strdup")
+dword_965f4 = dlsym(-1, "munmap")
+dword_965f8 = dlsym(-1, "free")
+dword_965fc = dlsym(-1, "access")
+dword_96600 = dlsym(-1, "open")
+dword_96604 = dlsym(-1, "fstat")
+dword_96608 = dlsym(-1, "mmap")
+dword_9660c = dlsym(-1, "close")
+dword_96610 = dlsym(-1, "write")
+
+-------------------------------------------------------------------
+
+sub_3aa20
+dword_966a0 = dlsym(-1, "calloc")
+dword_966a4 = dlsym(-1, "free")
+dword_966a8 = dlsym(-1, "write")
+
+--------------------------------------------------------------------
+
+sub_3bba4
+dword_966fc = dlsym(-1, "calloc")
+dword_96700 = dlsym(-1, "crc32")
+dword_96704 = dlsym(-1, "free")
+
+--------------------------------------------------------------------
+
+sub_3d8c8
+dword_9679c = dlsym(-1, "gettimeofday")
+dword_967a0 = dlsym(-1, "access")
+
+--------------------------------------------------------------------
+
+sub_485cc
+dword_96808 = dlsym(-1, "strcmp")
+dword_9680c = dlsym(-1, "free")
+dword_96810 = dlsym(-1, "inflateInit2_")
+dword_96814 = dlsym(-1, "crc32")
+dword_96818 = dlsym(-1, "inflate")
+dword_9681c = dlsym(-1, "inflateEnd")
+
+---------------------------------------------------------------------
+
+sub_491bc
+dword_96898 = dlsym(-1, "fopen")
+dword_9689c = dlsym(-1, "fread")
+dword_968a0 = dlsym(-1, "fwrite")
+dword_968a4 = dlsym(-1, "ftell")
+dword_968a8 = dlsym(-1, "fseek")
+dword_968ac = dlsym(-1, "fclose")
+
+---------------------------------------------------------------------
+`
+
+### 三、寻找attachBaseContext
+
+反编译SubApplication，可以看到有attachBaseContext函数的声明，显然做过evilapk400的就知道这个函数的作用。找这个很简单，JNI_onLoad中sub_86A38这个函数里面调用了RegisterNatives，注册了函数的对应关系。attachBaseContext对应sub_11B18。
+
+### 四、attachBaseContext分析
+
+一个大函数，进行了代码混淆，这些主要增加的分析的时间和工作量。关键函数在`sub_86A68`。从attachBaseContext开始到pcreate_thread的调用流程：
+
+`
+attachBaseContext -> sub_86A68 -> sub_86A6C -> sub_1BC68 -> 1A8E8 ->(这一步是通过 .data.rel.ro:934c8 表间接调用的，有可能是C++类的vtable) sub_20374 -> sub_1A864 -> sub_86C58 -> sub_20B98 -> pcreate_thread
+`
+
+线程调用参数和同步：
+
+```
+//param_95AB4 -> /data/data/crackme.a3/lib/libmobisecz.so
+pcreate_thread(NULL, 0, sub_20AE5, param_95AB4, 959A0, threadid_95AB0)
+pthread_join (*threadid_95AB0)
+```
+
+线程是带参数启动的，libmobisecz.so就是解密dex的关键文件了。
+因为时间关系，怎么解密的就不再详细分析了。要完美还原出C++的类来是个难点，以我的菜鸟水平还是不能胜任的。通过分析，掌握了几个以前不知道的知识点，这就够了。呵呵
