@@ -49,7 +49,7 @@ dex文件进行过处理，除了method_code_off指向文件size的**后方**以
 1. IDA调试获取。显然这个需要绕过反调试，能正常在调试器中运行程序才行。
 2. 直接运行apk，然后在`/proc/pid/task`选择一个线程attach，当然这个线程要没有调用ptrace，TRACE_ME才行。这样就是可以dump整个内存，然后进行离线分析。（这个方法要感谢老白）
 
-### 步骤
+### 步骤二
 找到47ff2000处，发现这个地址开头的是一个odex文件。可以直接dump其中的dex部分，当然也可以dump整个odex，但baksmali和smali在处理odex的时候需要模拟器/system/framework中的内容，比较麻烦一些。
 
 010Editor分析dump出来的dex，发现中断在某个Annotation的分析上，可以将Annotation_off改成0，继续分析，会中断在`method_code_off`上，错误是超出了文件的size。看其值，发现是超出了文件的末尾（不是负值，否则要往上找，那就需要像evilapk400那样手动修补了）。
