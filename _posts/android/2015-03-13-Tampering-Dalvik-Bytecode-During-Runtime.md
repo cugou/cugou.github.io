@@ -14,7 +14,7 @@ description:
 
 # 第一步：zip伪加密
 
-[图](/public/img/2015-03-13_delta_zip_encrypt.png)
+![图](/public/img/2015-03-13_delta_zip_encrypt.png)
 winrar打开apk可以看到有文件被打 * 号，说明是加密的，解压缩提示需要输入密码。
 
 `
@@ -33,8 +33,8 @@ winrar打开apk可以看到有文件被打 * 号，说明是加密的，解压�
 `ushort flagType`其中的第0为标识文件是否加密，改成0就可以了。
 具体方法当然使用010Editor的`replace`功能，搜索替换字节序列。（从magic number开始到flagType）
 
-[图](/public/img/2015-03-13_delta_file_encrypt.png)
-[图](/public/img/2015-03-13_delta_direntry_encrypt.png)
+![图](/public/img/2015-03-13_delta_file_encrypt.png)
+![图](/public/img/2015-03-13_delta_direntry_encrypt.png)
 
 
 # 第二步：
