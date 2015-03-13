@@ -15,6 +15,7 @@ description:
 # 第一步：zip伪加密
 
 ![图](/public/img/2015-03-13_delta_zip_encrypt.png)
+
 winrar打开apk可以看到有文件被打 * 号，说明是加密的，解压缩提示需要输入密码。
 
 `
