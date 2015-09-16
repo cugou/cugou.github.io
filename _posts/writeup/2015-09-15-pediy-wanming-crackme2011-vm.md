@@ -105,7 +105,7 @@ xor指令
 
 ![pic1](/public/img/2015-09-15-vm_1.png)
 
-or指令
+and指令
 
 ![pic2](/public/img/2015-09-15-vm_2.png)
 
