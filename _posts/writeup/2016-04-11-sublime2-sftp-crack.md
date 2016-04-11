@@ -30,6 +30,7 @@ strings *.pyc | findstr purchase 或者 strings *.pyc | grep purchase
 
 ## 4、代码分析：
 第56行开始：
+
 ```python
 class SftpCommand(object):
     connections = {}
@@ -58,6 +59,7 @@ class SftpCommand(object):
 ```
 
 第240行开始：
+
 ```python
                     if self.action not in ('list', 'listr', 'llist', 'llistr', 'cwd'):
                         SftpCommand.elements[0] += 1
@@ -99,7 +101,9 @@ class SftpCommand(object):
 
 ## 5、crack it
 实际上能完美反编译，并找到关键地方，直接去除就可以了。但完美破解是要生成注册码，实际上也不难。
+
 ```python
+
 import hmac, binascii
 from itertools import izip, cycle
 
