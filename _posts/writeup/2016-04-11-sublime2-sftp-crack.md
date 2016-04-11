@@ -14,21 +14,21 @@ description:
 vim实在是太难配置的如同sublime text这样顺手了。虽然使用git，可以实现本地开发和服务器的同步（参考本笔记的相关文章）。但需要运行几个命令还要输入密码，对于频繁的只修改一两个单词的编辑部署需求，显然过于繁琐了。
 幸好发现还有sftp这种sublime text的神奇插件，可以支持本地sublime text2直接打开远程服务器上的文件，编辑后能直接Ctrl+s同步到服务器。
 
-##1、找到sftp插件文件的安装位置：
+## 1、找到sftp插件文件的安装位置：
 windows下，sublime text2的插件都安装在 C:\Users\d\AppData\Roaming\Sublime Text 2\Packages\ 目录下。
 C:\Users\d\AppData\Roaming\Sublime Text 2\Packages\SFTP\sftp 目录下就是该插件的执行脚本，都是pyc文件。
 
-##2、找到关键代码文件：
+## 2、找到关键代码文件：
 根据弹出对话框的提示，找到关键词“purchase”。
 strings *.pyc | findstr purchase 或者 strings *.pyc | grep purchase
 
 发现只有一条输出，只有一个文件的一处地方存在关键点。一个一个文件找，很容易定位到commands.pyc文件。
 
-##3、反编译commands.pyc
+## 3、反编译commands.pyc
 找个能反编译python2.7的就行，我机器安装的是python2.7。
 对抗反编译，去年ctf上的一个python的题目，前面多了2字节的nop，导致没有现成的python语句能表示（python指令长度一般3字节），最终反编译出错。但貌似这种方法，需要对后面的代码进行大范围的地址重定位。对于这种大好几千行的文件，太坑了点。
 
-##4、代码分析：
+## 4、代码分析：
 第56行开始：
 ```python
 class SftpCommand(object):
@@ -97,7 +97,7 @@ class SftpCommand(object):
                     self.do_operation(do_show)
 ```
 
-5、crack it
+## 5、crack it
 实际上能完美反编译，并找到关键地方，直接去除就可以了。但完美破解是要生成注册码，实际上也不难。
 ```python
 import hmac, binascii
